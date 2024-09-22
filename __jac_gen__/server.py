@@ -24,7 +24,7 @@ class Session(_Jac.Node):
     status: int = _Jac.has_instance_default(gen_func=lambda: 1)
 
     def llm_chat(self, message: str, chat_history: list[dict], agent_role: str, context: list) -> str:
-        return _Jac.with_llm(file_loc=__file__, model=llm1, model_params={}, scope='server(Module).Session(node).llm_chat(Ability)', incl_info=[], excl_info=[], inputs=[('current message', str, 'message', message), ('chat history', list[dict], 'chat_history', chat_history), ('role of the agent responding', str, 'agent_role', agent_role), ('retrieved context from documents', list, 'context', context)], outputs=('response', 'str'), action='Respond to message using chat_history as context and agent_role as the goal of the agent', _globals=globals(), _locals=locals())
+        return _Jac.with_llm(file_loc=__file__, model=llm2, model_params={}, scope='server(Module).Session(node).llm_chat(Ability)', incl_info=[], excl_info=[], inputs=[('current message', str, 'message', message), ('chat history', list[dict], 'chat_history', chat_history), ('role of the agent responding', str, 'agent_role', agent_role), ('retrieved context from documents', list, 'context', context)], outputs=('response', 'str'), action='Respond to message using chat_history as context and agent_role as the goal of the agent', _globals=globals(), _locals=locals())
 
 @_Jac.make_node(on_entry=[], on_exit=[])
 @__jac_dataclass__(eq=False)

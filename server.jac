@@ -16,7 +16,7 @@ node Session { # for llama3.1 8B
         chat_history: 'chat history':list[dict],
         agent_role:'role of the agent responding':str,
         context:'retrieved context from documents':list
-    ) -> 'response':str by llm1();
+    ) -> 'response':str by llm2();
 }
 
 node Session_2 { # for gemma2 9B
@@ -52,7 +52,7 @@ walker interact {
         response = here.llm_chat(
             message=self.message,
             chat_history=here.chat_history,
-            agent_role="You are a conversation agent designed to help users with their queries based on the documents provided. Please answer the queries according to what you retrieved from the documents.",
+            agent_role="You are a conversation agent designed to help users with their queries based on the documents provided. Please answer the user's queries according to what you retrieved from the documents and the chat history.",
             context=data
         );
 
