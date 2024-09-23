@@ -19,13 +19,14 @@ rag_engine: RagEngine = RagEngine()
 class ChatType(__jac_Enum__):
     RAG = 'RAG'
     QA = 'user_qa'
+    FUN_FACTS = 'fun_facts'
 
 @_Jac.make_node(on_entry=[], on_exit=[])
 @__jac_dataclass__(eq=False)
 class Router(_Jac.Node):
 
     def classify(self, message: str) -> ChatType:
-        return _Jac.with_llm(file_loc=__file__, model=llm, model_params={'method': 'Reason', 'temperature': 0.0}, scope='server(Module).Router(node).classify(Ability)', incl_info=[], excl_info=[], inputs=[('query from the user to be routed.', str, 'message', message)], outputs=('', 'ChatType'), action='route the query to the appropriate task type', _globals=globals(), _locals=locals())
+        return _Jac.with_llm(file_loc=__file__, model=llm, model_params={'method': 'Reason', 'temperature': 0.0, 'max_tokens': 10, 'stop': ['RAG', 'user_qa', 'fun_facts']}, scope='server(Module).Router(node).classify(Ability)', incl_info=[], excl_info=[], inputs=[('query from the user to be routed.', str, 'message', message)], outputs=('', 'ChatType'), action='route the query to the appropriate task type', _globals=globals(), _locals=locals())
 
 @_Jac.make_walker(on_entry=[_Jac.DSFunc('init_router', _Jac.RootType), _Jac.DSFunc('route', Router)], on_exit=[])
 @__jac_dataclass__(eq=False)
@@ -40,6 +41,7 @@ class infer(_Jac.Walker):
             router_node = _Jac.connect(left=_jac_here_, right=Router(), edge_spec=_Jac.build_edge(is_undirected=False, conn_type=None, conn_assign=None))
             _Jac.connect(left=router_node, right=RagChat(), edge_spec=_Jac.build_edge(is_undirected=False, conn_type=None, conn_assign=None))
             _Jac.connect(left=router_node, right=QAChat(), edge_spec=_Jac.build_edge(is_undirected=False, conn_type=None, conn_assign=None))
+            _Jac.connect(left=router_node, right=FunFactsChat(), edge_spec=_Jac.build_edge(is_undirected=False, conn_type=None, conn_assign=None))
             if _Jac.visit_node(self, router_node):
                 pass
 
@@ -75,6 +77,18 @@ class QAChat(Chat, _Jac.Node):
         def respond_with_llm(message: str, chat_history: list[dict], agent_role: str) -> str:
             return _Jac.with_llm(file_loc=__file__, model=llm, model_params={}, scope='server(Module).QAChat(node).respond(Ability).respond_with_llm(Ability)', incl_info=[], excl_info=[], inputs=[('current message', str, 'message', message), ('chat history', list[dict], 'chat_history', chat_history), ('role of the agent responding', str, 'agent_role', agent_role)], outputs=('response', 'str'), action='Respond to message using chat_history as context and agent_role as the goal of the agent', _globals=globals(), _locals=locals())
         _jac_here_.response = respond_with_llm(_jac_here_.message, _jac_here_.chat_history, agent_role='You are a conversation agent designed to help users with their queries')
+
+@_Jac.make_node(on_entry=[_Jac.DSFunc('respond', infer)], on_exit=[])
+@__jac_dataclass__(eq=False)
+class FunFactsChat(Chat, _Jac.Node):
+    chat_type: ChatType = _Jac.has_instance_default(gen_func=lambda: ChatType.FUN_FACTS)
+
+    def respond(self, _jac_here_: infer) -> None:
+
+        def respond_with_llm(message: str, chat_history: list[dict], agent_role: str) -> str:
+            return _Jac.with_llm(file_loc=__file__, model=llm, model_params={}, scope='server(Module).FunFactsChat(node).respond(Ability).respond_with_llm(Ability)', incl_info=[], excl_info=[], inputs=[('current message', str, 'message', message), ('chat history', list[dict], 'chat_history', chat_history), ('role of the agent responding', str, 'agent_role', agent_role)], outputs=('response', 'str'), action='Respond with fun facts or trivia', _globals=globals(), _locals=locals())
+        _jac_here_.response = respond_with_llm(_jac_here_.message, _jac_here_.chat_history, agent_role='You are a fun and entertaining agent who shares fun facts and trivia.')
+        return {'response': _jac_here_.response}
 
 @_Jac.make_walker(on_entry=[_Jac.DSFunc('init_session', _Jac.RootType)], on_exit=[])
 @__jac_dataclass__(eq=False)

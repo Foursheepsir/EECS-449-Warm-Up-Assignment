@@ -6,13 +6,16 @@ glob rag_engine:RagEngine = RagEngine();
 
 enum ChatType {
     RAG : 'Need to use Retrievable information in specific documents to respond' = "RAG",
-    QA : 'Given context is enough for an answer' = "user_qa"
+    QA : 'Given context is enough for an answer' = "user_qa",
+    FUN_FACTS : 'The user is asking for fun facts or trivia' = "fun_facts"
 }
 
 node Router {
     can 'route the query to the appropriate task type'
-    classify(message:'query from the user to be routed.':str) -> ChatType by llm(method="Reason", temperature=0.0);
+    # Modify classify to handle multi-class classification
+    classify(message:'query from the user to be routed.':str) -> ChatType by llm(method="Reason", temperature=0.0, max_tokens=10, stop=['RAG', 'user_qa', 'fun_facts']);
 }
+
 
 walker infer {
     has message:str;
@@ -23,6 +26,7 @@ walker infer {
             router_node = here ++> Router();
             router_node ++> RagChat();
             router_node ++> QAChat();
+            router_node ++> FunFactsChat();  # Add FunFactsChat here
             visit router_node;
         }
     }
@@ -63,6 +67,24 @@ node QAChat :Chat: {
             agent_role:'role of the agent responding':str
                 ) -> 'response':str by llm();
         here.response = respond_with_llm(here.message, here.chat_history, agent_role="You are a conversation agent designed to help users with their queries");
+    }
+}
+
+node FunFactsChat :Chat: {
+    has chat_type: ChatType = ChatType.FUN_FACTS;
+
+    can respond with infer entry {
+        can 'Respond with fun facts or trivia'
+        respond_with_llm(   
+            message:'current message':str,
+            chat_history: 'chat history':list[dict],
+            agent_role:'role of the agent responding':str
+        ) -> 'response':str by llm();
+
+        here.response = respond_with_llm(here.message, here.chat_history, agent_role="You are a fun and entertaining agent who shares fun facts and trivia.");
+        return {
+            "response": here.response  # Return response to infer walker
+        };
     }
 }
 
