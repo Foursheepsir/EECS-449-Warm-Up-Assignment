@@ -1,0 +1,8 @@
+The code-a-long generally went smoothly. But I think the most difficult part is the setting-up. The coding itself was good and not difficult,
+but there were a lot of weird bugs coming out in my linux shell when I wanted to launch the docker, initiated my mongodb server, and ran 'mongosh'.
+For example, there are many times when I followed the same procedure as the tutorial, but receiving different responses complaining about something
+was already running or something failed or the port was already in use. It turned out that the Daemon for that process was still running, or something was running in the background,
+where I had to use 'ps aux' and 'grep' to detect. Also, because my Ubuntu is of older version, I took a long time downloading and (re)installing the python3.12,
+which was also very tiring. However, apart from all these small bugs, the process for building the AI application from 0 to 1 was amazing, and I really enjoyed
+the moment when my chatbot was running properly, and felt very excited when I added the custom parts and they did work! I appreciate the tutorial, and the jac
+language was really powerful!

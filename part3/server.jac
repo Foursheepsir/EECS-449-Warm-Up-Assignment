@@ -103,7 +103,7 @@ walker interact {
 
 }
 
-node Session { # for llama3.1 8B
+node Session {
     has id: str;
     has chat_history: list[dict];
     has status: int = 1;

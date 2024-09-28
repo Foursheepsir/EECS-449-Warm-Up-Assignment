@@ -1,0 +1,13 @@
+Now, based on the LLM classification, the chatbot will route the user query to one of the Chat nodes (including FunFactsChat). When the user asks something that falls under the FUN_FACTS classification, the chatbot will route the query to FunFactsChat, which will provide a response about an entertaining fact or trivia accordingly.
+
+The routing process:
+1. When a user sends a message to the chatbot, the infer walker initiates the process to determine which type of response is required.
+2. The Router node contains a classify function that processes the user's message using an LLM (in this case, llm(method="Reason", temperature=0.0)).
+3. The classification logic has been modified to handle three possible classes: RAG, QA, and FUN_FACTS.
+4. The classify function uses the language model to interpret the user's intent and classify it into one of these three categories. The stop parameter ensures that the LLM will output only one of the possible classifications (RAG, user_qa, or fun_facts), depending on the content and context of the query.
+5. After the classification is performed, the infer walker calls the route capability to visit the appropriate chat node (RagChat, QAChat, or FunFactsChat) based on the classification result.
+6. If the classification result is FUN_FACTS, the infer walker routes the user's query to the FunFactsChat node.
+7. The FunFactsChat node is a custom node specifically designed to handle queries that request trivia or fun facts. It will generate a response using the LLM, with a predefined prompt that encourages a fun, light-hearted, and entertaining response.
+8. The FunFactsChat node has a respond capability, which calls respond_with_llm() to generate the response.
+9. The agent role for respond_with_llm() in FunFactsChat is set to "You are a fun and entertaining agent who shares fun facts and trivia."
+10. This ensures that the chatbot’s response aligns with the user’s intent of receiving a fun fact or trivia, providing a playful and informative interaction.
